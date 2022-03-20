@@ -1,0 +1,13 @@
+server:
+  port: 9997
+spring:
+  application:
+    name: chatroom-user # 服务名称
+
+  activemq:
+    broker-url: tcp://127.0.0.1:61616
+    user: admin
+    password: admin
+
+  jms:
+    pub-sub-domain: true # 发布订阅模式
