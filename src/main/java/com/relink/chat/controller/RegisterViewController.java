@@ -2,11 +2,9 @@ package com.relink.chat.controller;
 
 import com.relink.chat.ChatRoomApplication;
 import com.relink.chat.component.Dialog;
-import com.relink.chat.component.Global;
 import com.relink.chat.core.util.ReturnNo;
 import com.relink.chat.core.util.ReturnObject;
 import com.relink.chat.dao.UserDao;
-import com.relink.chat.view.ChatRoomView;
 import com.relink.chat.view.LoginView;
 import com.relink.chat.view.RegisterView;
 import de.felixroske.jfxsupport.FXMLController;
@@ -26,7 +24,7 @@ import java.util.ResourceBundle;
 
 @FXMLController
 @Component
-public class LoginViewController implements Initializable {
+public class RegisterViewController implements Initializable {
 
     private Stage stage;
 
@@ -34,34 +32,36 @@ public class LoginViewController implements Initializable {
     private UserDao userDao;
 
     @Autowired
-    private LoginView loginView;
+    private RegisterView registerView;
 
     @FXML
-    private Button jumpToChat;
+    private TextField registerUsername;
 
     @FXML
-    private Button jumpToRegister;
+    private PasswordField registerPassword;
 
     @FXML
-    private TextField loginUsername;
+    private PasswordField checkPassword;
 
     @FXML
-    private PasswordField loginPassword;
+    private Button jumpToLogin;
+
+    @FXML
+    private Button registerBtn;
 
     @FXML
     private void LoginBtnClicked() {
-        ReturnObject ret =  userDao.login(loginUsername.getText(), loginPassword.getText());
-        if(ret.getCode() == ReturnNo.OK) {
-            Global.username = loginUsername.getText();
-            ChatRoomApplication.showView(ChatRoomView.class);
-        } else {
-            Dialog.showErrorDialog(ret.getCode().getMessage());
-        }
+        ChatRoomApplication.showView(LoginView.class);
     }
 
     @FXML
     private void RegisterBtnClicked() {
-        ChatRoomApplication.showView(RegisterView.class);
+        ReturnObject ret = userDao.register(registerUsername.getText(), registerPassword.getText(), checkPassword.getText());
+        if(ret.getCode() == ReturnNo.OK) {
+            Dialog.showStandardDialog("注册成功");
+        } else {
+            Dialog.showErrorDialog(ret.getCode().getMessage());
+        }
     }
 
     @Override
@@ -74,9 +74,9 @@ public class LoginViewController implements Initializable {
      */
     void init() {
         Platform.runLater(() -> {
-            Parent parent = loginView.getView();
-            LoginViewController.this.stage = (Stage) parent.getScene().getWindow();
-            stage.setTitle("LoginView");
+            Parent parent = registerView.getView();
+            RegisterViewController.this.stage = (Stage) parent.getScene().getWindow();
+            stage.setTitle("RegisterView");
             stage.setResizable(false);
         });
     }

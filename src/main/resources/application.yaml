@@ -1,5 +1,5 @@
 server:
-  port: 9997
+  port: 9999
 spring:
   application:
     name: chatroom-user # 服务名称
@@ -11,3 +11,22 @@ spring:
 
   jms:
     pub-sub-domain: true # 发布订阅模式
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/chatroom?serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+    druid:
+      initial-size: 3
+      min-idle: 3
+      max-active: 100
+      max-wait: 60000
+
+mybatis:
+  type-aliases-package: com.relink.chat.model.po
+  mapper-locations: classpath*:com.relink.chat.mapper/*.xml
+  configuration:
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true

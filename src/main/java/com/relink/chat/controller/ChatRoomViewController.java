@@ -17,19 +17,20 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.StreamMessage;
-import javax.jms.TextMessage;
+import javax.jms.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 @FXMLController
+@Configuration
+@EnableJms
 public class ChatRoomViewController implements Initializable {
 
     private Stage stage;
