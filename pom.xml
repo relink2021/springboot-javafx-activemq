@@ -64,6 +64,11 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -77,8 +82,8 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>8.8.3</version>
                 <configuration>
-<!--                    <mainClass>example.Main</mainClass>-->
-<!--                    <vendor>Spartajet</vendor>-->
+                    <!--                    <mainClass>example.Main</mainClass>-->
+                    <!--                    <vendor>Spartajet</vendor>-->
                 </configuration>
             </plugin>
             <plugin>

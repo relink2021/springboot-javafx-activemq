@@ -1,8 +1,10 @@
 package com.relink.chat.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.relink.chat.component.ChatPane;
 import com.relink.chat.component.FilePane;
 import com.relink.chat.component.Global;
+import com.relink.chat.core.util.Translate;
 import com.relink.chat.view.ChatRoomView;
 import de.felixroske.jfxsupport.FXMLController;
 import javafx.application.Platform;
@@ -13,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -68,15 +71,7 @@ public class ChatRoomViewController implements Initializable {
      */
     @FXML
     private void sendTextMessage() {
-        jmsTemplate.send("topic01", session -> {
-            chatPane = new ChatPane(chatMessage.getText(), Global.RIGHT, Global.username);
-            messageVbox.getChildren().add(chatPane);
-            TextMessage textMessage = session.createTextMessage(chatMessage.getText());
-            textMessage.setJMSCorrelationID(Global.username);
-            chatMessage.clear();
-            messageScrollPane.setVvalue(1.0);
-            return textMessage;
-        });
+        commonSendText();
     }
 
     /**
@@ -141,6 +136,11 @@ public class ChatRoomViewController implements Initializable {
         init();
         nameLabel.setText(Global.username);
         chatMessage.textProperty().addListener((obs, oldVal, newVal) -> sendMessageBtn.setDisable(newVal.isEmpty()));
+        chatMessage.setOnKeyPressed(event -> {
+            if(event.isAltDown() && event.getCode() == KeyCode.S && !chatMessage.getText().isEmpty()) {
+                commonSendText();
+            }
+        });
     }
 
     /**
@@ -152,6 +152,21 @@ public class ChatRoomViewController implements Initializable {
             ChatRoomViewController.this.stage = (Stage) parent.getScene().getWindow();
             stage.setTitle("ChatRoomView");
             stage.setResizable(false);
+        });
+    }
+
+    /**
+     * 发送消息的动作
+     */
+    private void commonSendText() {
+        jmsTemplate.send("topic01", session -> {
+            chatPane = new ChatPane(chatMessage.getText(), Global.RIGHT, Global.username);
+            messageVbox.getChildren().add(chatPane);
+            TextMessage textMessage = session.createTextMessage(chatMessage.getText());
+            textMessage.setJMSCorrelationID(Global.username);
+            chatMessage.clear();
+            messageScrollPane.setVvalue(1.0);
+            return textMessage;
         });
     }
 }
