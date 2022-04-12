@@ -1,5 +1,6 @@
 package com.relink.chat.component;
 
+import com.relink.chat.core.util.Translate;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -7,13 +8,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
-
+import com.relink.chat.core.util.WebBrowser;
 /**
  * 文字框
  */
 public class ChatPane extends AnchorPane {
 
     public ChatPane(String message, int state, String sender) {
+        WebBrowser weBrowser=new WebBrowser();
         super.setPrefWidth(590);
         // 头像
         ImageView imageView = new ImageView(new Image("file:E:\\Github_repository\\springboot-javafx-activemq\\src\\main\\resources\\images\\image1.jpg"));
@@ -34,6 +36,7 @@ public class ChatPane extends AnchorPane {
         } else {
             label2.setStyle("-fx-background-color: #fff; -fx-background-radius: 5px");
         }
+
         label2.setPadding(new Insets(5,10,5,10));
         label2.setWrapText(true);
         label2.setMaxWidth(400);
@@ -58,5 +61,14 @@ public class ChatPane extends AnchorPane {
             AnchorPane.setLeftAnchor(label2, 70.0);
         }
         AnchorPane.setTopAnchor(label2, 45.0);
+
+        // 点击实现翻译
+        label2.setOnMouseClicked(event -> {
+
+            if(weBrowser.webstart(message)==0)//检查网址有效性
+            {Dialog.showStandardDialog("中文翻译: " + Translate.toEnglish(message, "en", "zh") + "\n" +
+                    "英文翻译: " + Translate.toEnglish(message, "zh", "en"));}
+
+        });
     }
 }

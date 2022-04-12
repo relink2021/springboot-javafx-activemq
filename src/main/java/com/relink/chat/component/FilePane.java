@@ -1,5 +1,6 @@
 package com.relink.chat.component;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -10,8 +11,11 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-
+import javax.swing.Icon;
 import java.io.File;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.SyncFailedException;
 
 /**
  * 文件框
@@ -35,7 +39,33 @@ public class FilePane extends AnchorPane {
         BorderPane file_content = new BorderPane();
         BorderPane rightPane = new BorderPane();
         String type = message.substring(message.lastIndexOf('.') + 1);
-        ImageView icon = new ImageView(new Image(FileType.getValue(type)));
+
+        /**
+         * 22/4/26 彭灏改动，读入文件图标图片
+         * */
+        //start
+        String simpleend="."+type;
+        File f=null;
+        try {
+            f = File.createTempFile("icon", simpleend);
+
+        }catch (Exception e)
+        {
+
+        }
+
+        Icon fileicon=FileType.getSmallIcon(f);
+        BufferedImage bufferedImage = new BufferedImage(
+                fileicon.getIconWidth(),
+                fileicon.getIconHeight(),
+                BufferedImage.TYPE_INT_ARGB
+        );
+        fileicon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+        Image fxImage= SwingFXUtils.toFXImage(bufferedImage,null);
+        f.deleteOnExit();
+        //end
+//  以下未改动
+        ImageView icon = new ImageView(fxImage);
         icon.setFitWidth(55.0);
         icon.setFitHeight(60.0);
         // 文件名
