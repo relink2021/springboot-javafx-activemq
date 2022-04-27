@@ -60,14 +60,14 @@ public class FilePane extends AnchorPane {
                 fileicon.getIconHeight(),
                 BufferedImage.TYPE_INT_ARGB
         );
-        fileicon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
+        fileIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
         Image fxImage= SwingFXUtils.toFXImage(bufferedImage,null);
         f.deleteOnExit();
         //end
 //  以下未改动
         ImageView icon = new ImageView(fxImage);
-        icon.setFitWidth(55.0);
-        icon.setFitHeight(60.0);
+        icon.setFitWidth(50.0);
+        icon.setFitHeight(55.0);
         // 文件名
         double byte_len = buf.length;
         int cnt = 0;
