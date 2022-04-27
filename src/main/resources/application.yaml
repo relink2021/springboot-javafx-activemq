@@ -10,7 +10,7 @@ spring:
     password: admin
 
   jms:
-    pub-sub-domain: false # 发布订阅模式
+    pub-sub-domain: true # 发布订阅模式
     template:
       delivery-mode: persistent # 消息持久化
 
