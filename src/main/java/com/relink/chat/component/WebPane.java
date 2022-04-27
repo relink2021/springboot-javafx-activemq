@@ -17,15 +17,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.SyncFailedException;
 
-/**
- * 文件框
- */
-public class FilePane extends AnchorPane {
 
-    public FilePane(String message, byte[] buf, int state, String sender, Stage stage) {
-        super.setPrefWidth(590);
-        // 头像
-        ImageView imageView = new ImageView(new Image("file:E:\\Github_repository\\springboot-javafx-activemq\\src\\main\\resources\\images\\image1.jpg"));
+public class WebPane extends AnchorPane {
+    private ImageView icon;
+
+    public WebPane(String message, int state, String sender, Stage stage)
+    {
+// 头像
+        ImageView imageView = new ImageView(new Image("https://img2.baidu.com/it/u=2453667744,808227769&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"));
         imageView.setFitHeight(40);
         imageView.setFitWidth(40);
         // 昵称
@@ -35,56 +34,18 @@ public class FilePane extends AnchorPane {
             label1.setTextAlignment(TextAlignment.RIGHT);
         }
         label1.setMaxWidth(400);
-        // 文件
         BorderPane file_content = new BorderPane();
         BorderPane rightPane = new BorderPane();
-        String type = message.substring(message.lastIndexOf('.') + 1);
-
-        /**
-         * 22/4/26 彭灏改动，读入文件图标图片
-         * */
-        //start
-        String simpleend="."+type;
-        File f=null;
-        try {
-            f = File.createTempFile("icon", simpleend);
-
-        }catch (Exception e)
-        {
-
-        }
-
-        Icon fileicon=FileType.getSmallIcon(f);
-        BufferedImage bufferedImage = new BufferedImage(
-                fileicon.getIconWidth(),
-                fileicon.getIconHeight(),
-                BufferedImage.TYPE_INT_ARGB
-        );
-        fileicon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
-        Image fxImage= SwingFXUtils.toFXImage(bufferedImage,null);
-        f.deleteOnExit();
-        //end
-//  以下未改动
-        ImageView icon = new ImageView(fxImage);
-        icon.setFitWidth(55.0);
-        icon.setFitHeight(60.0);
-        // 文件名
-        double byte_len = buf.length;
-        int cnt = 0;
-        while(byte_len > 1024) {
-            byte_len = byte_len / 1024.0;
-            cnt++;
-        }
-        // 计算文件大小
-        Label filename = new Label(message + String.format("(%.1f%s)", byte_len, FileSize.getValue(cnt)));
-        filename.setFont(new Font(18));
-        // 下载按钮
-        DownLoadButton download = new DownLoadButton(stage, "点击下载", buf, message);
-        download.setTextFill(Paint.valueOf("#7777e7"));
-        download.setStyle("-fx-background-color: #fff; -fx-border-color: #fff; -fx-font-size: 18;");
+        this.icon=new ImageView(new Image("https://img2.baidu.com/it/u=2453667744,808227769&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"));
+        icon.setFitHeight(40);
+        icon.setFitWidth(40);
+        WebAccessButton access = new WebAccessButton("点击访问",stage,message);
+        access.setTextFill(Paint.valueOf("#7777e7"));
+        access.setStyle("-fx-background-color: #fff; -fx-border-color: #fff; -fx-font-size: 18;");
         // 装入右框架
-        rightPane.setTop(filename);
-        rightPane.setBottom(download);
+        Label mes2=new Label(message);
+        rightPane.setTop(mes2);
+        rightPane.setBottom(access);
         // 装入主框架
         file_content.setLeft(icon);
         file_content.setRight(rightPane);
@@ -110,5 +71,6 @@ public class FilePane extends AnchorPane {
             AnchorPane.setLeftAnchor(file_content, 70.0);
         }
         AnchorPane.setTopAnchor(file_content, 45.0);
+
     }
 }

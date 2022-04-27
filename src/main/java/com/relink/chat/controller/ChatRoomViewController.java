@@ -1,9 +1,13 @@
 package com.relink.chat.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.relink.chat.component.ChatPane;
 import com.relink.chat.component.FilePane;
 import com.relink.chat.component.Global;
 import com.relink.chat.component.LinkPane;
+import com.relink.chat.core.util.Translate;
+import com.relink.chat.component.WebPane;
+import com.relink.chat.core.util.WebBrowser;
 import com.relink.chat.view.ChatRoomView;
 import de.felixroske.jfxsupport.FXMLController;
 import javafx.application.Platform;
@@ -44,6 +48,10 @@ public class ChatRoomViewController implements Initializable {
 
     private LinkPane linkPane;
 
+    private WebPane webPane;
+
+    private WebBrowser webBrowser;
+
     private final String timingMsg = "尚未打卡的同学，抓紧登录“Daily Health Report 健康打卡”系统 http://xmuxg.xmu.edu.cn/xmu/app/214 打卡";
 
     @Autowired
@@ -66,6 +74,7 @@ public class ChatRoomViewController implements Initializable {
 
     @FXML
     private Button sendFileBtn;
+
 
     @FXML
     private ScrollPane messageScrollPane;
@@ -109,7 +118,7 @@ public class ChatRoomViewController implements Initializable {
      * 实际应用: cron 每隔30分钟发送一次
      * 根据测试需要自行调整
      */
-    @Scheduled(cron = "0 */30 * * * ?")
+      @Scheduled(cron = "0 */30 * * * ?")
 //    @Scheduled(fixedDelay = 10000)
     public void sendTimingMessage() {
         Platform.runLater(() -> {
@@ -127,6 +136,7 @@ public class ChatRoomViewController implements Initializable {
     @JmsListener(destination = "topic01")
     private void receiveMessage(Message message, Session session) {
         try {
+
             if(message instanceof TextMessage) {
                 TextMessage textMessage = (TextMessage) message;
                 String sender = textMessage.getJMSCorrelationID();
@@ -140,7 +150,19 @@ public class ChatRoomViewController implements Initializable {
                             messageVbox.getChildren().add(linkPane);
                             messageScrollPane.setVvalue(1.0);
                         });
-                    } else {
+                    }
+                    /**
+                     * 22/04/27彭灏改动，加入网页修改
+                     */
+                    else if(webBrowser.webstart(textMessage.getText())==1){
+                        webPane = new WebPane(textMessage.getText(), Global.LEFT, sender,stage);
+                        Platform.runLater(() -> {
+                            messageVbox.getChildren().add(webPane);
+                            messageScrollPane.setVvalue(1.0);
+                        });
+                    }
+
+                    else {
                         chatPane = new ChatPane(textMessage.getText(), Global.LEFT, sender);
                         Platform.runLater(() -> {
                             messageVbox.getChildren().add(chatPane);
@@ -201,7 +223,12 @@ public class ChatRoomViewController implements Initializable {
      * 发送消息的动作
      */
     private void commonSendText() {
-        jmsTemplate.send("topic01", session -> {
+
+        if(webBrowser.webstart(chatMessage.getText())==0)
+        {jmsTemplate.send("topic01", session -> {
+
+
+
             chatPane = new ChatPane(chatMessage.getText(), Global.RIGHT, Global.username);
             messageVbox.getChildren().add(chatPane);
             TextMessage textMessage = session.createTextMessage(chatMessage.getText());
@@ -209,6 +236,22 @@ public class ChatRoomViewController implements Initializable {
             chatMessage.clear();
             messageScrollPane.setVvalue(1.0);
             return textMessage;
-        });
+
+
+        }
+        );}
+        else
+        {
+               jmsTemplate.send("topic01", session ->  {
+                  WebPane  webPane= new WebPane(chatMessage.getText(),Global.RIGHT,Global.username, stage);
+                  messageVbox.getChildren().add(webPane);
+                   TextMessage textMessage = session.createTextMessage(chatMessage.getText());
+                   textMessage.setJMSCorrelationID(Global.username);
+                   chatMessage.clear();
+                   return textMessage;
+
+               });
+        }
+
     }
 }

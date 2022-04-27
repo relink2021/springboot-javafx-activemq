@@ -1,5 +1,5 @@
 server:
-  port: 9997
+  port: 9998
 spring:
   application:
     name: chatroom-user # 服务名称
@@ -19,7 +19,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/chatroom?serverTimezone=GMT%2B8
     username: root
-    password: 123456
+    password: ph2233546
     druid:
       initial-size: 3
       min-idle: 3

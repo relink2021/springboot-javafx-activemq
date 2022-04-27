@@ -1,7 +1,12 @@
 package com.relink.chat.component;
 
 import java.io.File;
-
+import javax.swing.Icon;
+import javax.swing.filechooser.FileSystemView;
+import javafx.scene.image.Image;
+import java.net.URI;
+import java.net.URL;
+import java.awt.Toolkit;
 /**
  * 枚举类
  * 文件图标
@@ -53,4 +58,22 @@ public enum FileType {
         }
         return null;
     }
+    public static Icon getSmallIcon(File f)
+    {
+        if ( f != null && f.exists() )
+        {
+            FileSystemView fsv = FileSystemView.getFileSystemView();
+            return(fsv.getSystemIcon( f ) );
+        }
+        return(null);
+    }
+//    public static Image getImage(String name) {
+//        URL url = UtilTest.class.getClassLoader()
+//                .getResource("images/" +name);
+//        Image image  =Toolkit.getDefaultToolkit().getImage(url);
+//        return image;
+//    }
+
+
+
 }
