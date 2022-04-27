@@ -1,10 +1,9 @@
 package com.relink.chat.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.relink.chat.component.ChatPane;
 import com.relink.chat.component.FilePane;
 import com.relink.chat.component.Global;
-import com.relink.chat.core.util.Translate;
+import com.relink.chat.component.LinkPane;
 import com.relink.chat.view.ChatRoomView;
 import de.felixroske.jfxsupport.FXMLController;
 import javafx.application.Platform;
@@ -24,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.jms.*;
 import java.io.File;
@@ -41,6 +41,10 @@ public class ChatRoomViewController implements Initializable {
     private ChatPane chatPane;
 
     private FilePane filePane;
+
+    private LinkPane linkPane;
+
+    private final String timingMsg = "尚未打卡的同学，抓紧登录“Daily Health Report 健康打卡”系统 http://xmuxg.xmu.edu.cn/xmu/app/214 打卡";
 
     @Autowired
     private JmsTemplate jmsTemplate;
@@ -70,7 +74,7 @@ public class ChatRoomViewController implements Initializable {
      * 发送文本
      */
     @FXML
-    private void sendTextMessage() {
+    public void sendTextMessage() {
         commonSendText();
     }
 
@@ -78,7 +82,7 @@ public class ChatRoomViewController implements Initializable {
      * 发送文件
      */
     @FXML
-    private void sendFileMessage() throws Exception {
+    public void sendFileMessage() throws Exception {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("FileChooser");
         File file = fileChooser.showOpenDialog(stage);
@@ -100,33 +104,71 @@ public class ChatRoomViewController implements Initializable {
     }
 
     /**
+     * 定时发送消息: 定时提醒打卡机器人
+     * 测试时: fixedDelay 10秒发送一次
+     * 实际应用: cron 每隔30分钟发送一次
+     * 根据测试需要自行调整
+     */
+    @Scheduled(cron = "0 */30 * * * ?")
+//    @Scheduled(fixedDelay = 10000)
+    public void sendTimingMessage() {
+        Platform.runLater(() -> {
+            jmsTemplate.send("topic01", session -> {
+                TextMessage textMessage = session.createTextMessage(timingMsg);
+                textMessage.setJMSCorrelationID("自动打卡机器人");
+                return textMessage;
+            });
+        });
+    }
+
+    /**
      * 接收方
      */
     @JmsListener(destination = "topic01")
-    private void receiveMessage(Message message) throws JMSException {
-        if(message instanceof TextMessage) {
-            TextMessage textMessage = (TextMessage) message;
-            String sender = textMessage.getJMSCorrelationID();
-            if(!sender.equals(Global.username)) {
-                chatPane = new ChatPane(textMessage.getText(), Global.LEFT, sender);
-                Platform.runLater(() -> {
-                    messageVbox.getChildren().add(chatPane);
-                    messageScrollPane.setVvalue(1.0);
-                });
+    private void receiveMessage(Message message, Session session) {
+        try {
+            if(message instanceof TextMessage) {
+                TextMessage textMessage = (TextMessage) message;
+                String sender = textMessage.getJMSCorrelationID();
+                if(!sender.equals(Global.username)) {
+                    if(sender.equals("自动打卡机器人")) {
+                        linkPane = new LinkPane(textMessage.getText(), Global.LEFT, sender);
+                        Platform.runLater(() -> {
+                            if(messageVbox == null) {
+                                return;
+                            }
+                            messageVbox.getChildren().add(linkPane);
+                            messageScrollPane.setVvalue(1.0);
+                        });
+                    } else {
+                        chatPane = new ChatPane(textMessage.getText(), Global.LEFT, sender);
+                        Platform.runLater(() -> {
+                            messageVbox.getChildren().add(chatPane);
+                            messageScrollPane.setVvalue(1.0);
+                        });
+                    }
+                }
+            } else if (message instanceof StreamMessage) {
+                StreamMessage streamMessage = (StreamMessage) message;
+                String sender = streamMessage.getJMSCorrelationID();
+                if(!sender.equals(Global.username)) {
+                    int file_len = streamMessage.readInt();
+                    byte[] buf = new byte[file_len];
+                    streamMessage.readBytes(buf);
+                    String filename = streamMessage.readString();
+                    FilePane filePane = new FilePane(filename, buf, Global.LEFT, sender, stage);
+                    Platform.runLater(() -> {
+                        messageVbox.getChildren().add(filePane);
+                        messageScrollPane.setVvalue(1.0);
+                    });
+                }
             }
-        } else if (message instanceof StreamMessage) {
-            StreamMessage streamMessage = (StreamMessage) message;
-            String sender = streamMessage.getJMSCorrelationID();
-            if(!sender.equals(Global.username)) {
-                int file_len = streamMessage.readInt();
-                byte[] buf = new byte[file_len];
-                streamMessage.readBytes(buf);
-                String filename = streamMessage.readString();
-                FilePane filePane = new FilePane(filename, buf, Global.LEFT, sender, stage);
-                Platform.runLater(() -> {
-                    messageVbox.getChildren().add(filePane);
-                    messageScrollPane.setVvalue(1.0);
-                });
+            session.commit();
+        } catch (JMSException e) {
+            try {
+                session.rollback();
+            } catch (JMSException e1) {
+                e.printStackTrace();
             }
         }
     }
