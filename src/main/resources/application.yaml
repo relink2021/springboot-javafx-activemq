@@ -19,7 +19,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/chatroom?serverTimezone=GMT%2B8
     username: root
-    password: ph2233546
+    password: 123456
     druid:
       initial-size: 3
       min-idle: 3

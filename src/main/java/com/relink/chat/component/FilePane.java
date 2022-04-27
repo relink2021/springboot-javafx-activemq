@@ -11,9 +11,12 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import javax.swing.Icon;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import java.io.File;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.SyncFailedException;
 
@@ -54,17 +57,18 @@ public class FilePane extends AnchorPane {
 
         }
 
-        Icon fileicon=FileType.getSmallIcon(f);
+        FileSystemView fileSystemView = new JFileChooser().getFileSystemView();
+        Icon fileIcon = getBigIcon(f);
         BufferedImage bufferedImage = new BufferedImage(
-                fileicon.getIconWidth(),
-                fileicon.getIconHeight(),
+                fileIcon.getIconWidth(),
+                fileIcon.getIconHeight(),
                 BufferedImage.TYPE_INT_ARGB
         );
         fileIcon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
         Image fxImage= SwingFXUtils.toFXImage(bufferedImage,null);
         f.deleteOnExit();
         //end
-//  以下未改动
+        //  以下未改动
         ImageView icon = new ImageView(fxImage);
         icon.setFitWidth(50.0);
         icon.setFitHeight(55.0);
@@ -110,5 +114,21 @@ public class FilePane extends AnchorPane {
             AnchorPane.setLeftAnchor(file_content, 70.0);
         }
         AnchorPane.setTopAnchor(file_content, 45.0);
+    }
+
+    /**
+     * 从文件系统获取大图标
+     */
+    private static Icon getBigIcon(File f) {
+        if (f!=null && f.exists()) {
+            try {
+                sun.awt.shell.ShellFolder sf = sun.awt.shell.ShellFolder.getShellFolder(f);
+                return new ImageIcon(sf.getIcon(true));
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
